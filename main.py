@@ -62,12 +62,18 @@ canvas_note_img = canvas.create_image(500, 257, anchor=tk.NW, image=note_img)
 
 #35 pix
 # 17.5 pix height
+target_note_index = 30
 
 def getRandomTargetNoteIndex():
-    return random.randint(31, 60)
+    # return random.randint(31, 59)
+    if target_note_index >= 59:
+        return 31
+    else:
+        return target_note_index+1
 
 
-target_note_index = getRandomTargetNoteIndex()
+
+
 
 def playTune():
     player.play_wave(synthesizer.generate_constant_wave(dsp.notes_frequency[target_note_index], 20.0))
@@ -81,13 +87,14 @@ def next_btn_clicked():
         threading.Thread(target=playTune, args=()).start()
     target_note_index = getRandomTargetNoteIndex()
     index = -1
-    if len(possible_key_signature) > 0 :
+    if len(possible_key_signature) > 0:
         while index not in possible_key_signature:
-            index = random.randint(0, len(keys))
+            index = random.randint(0, len(keys)-1)
     else:
         index = 0
     # im = tk.PhotoImage(file="./img/key_signature/"+keys[index]+".png")
     canvas.itemconfig(canvas_key_img, image=key_imgs[index])
+    displayNote(target_note_index)
 
 
 def open_setting():
@@ -159,7 +166,6 @@ lbl_note_right.place(y=125, x=-30, relx=0.85)
 
 
 
-
 repeat_btn = tk.Button(window, text="Rejouer", command=repeat_btn_clicked)
 repeat_btn.place(y=565, x=-150, relx=0.5)
 
@@ -167,6 +173,25 @@ next_btn = tk.Button(window, text="Suivant", command=next_btn_clicked)
 next_btn.place(y=565, x=90, relx=0.5)
 
 
+def displayNote(noteIndex):
+    base_height = 257
+    height = base_height+17.5
+    for i in range(31,noteIndex+1):
+        if len(dsp.notes_name[i]) <= 5:
+            height -= 17.5
+        elif i == noteIndex:
+            height -= 17.5
+    note_name = dsp.notes_name[noteIndex]
+    if len(note_name) >= 5:
+        part_index = random.randint(0, 1)
+        print(part_index)
+        note_part = note_name.split('/')
+        note_name = note_part[part_index]
+        if part_index == 0:
+            height += 17.5
+
+    lbl_note.configure(text=note_name)
+    canvas.coords(canvas_note_img, (500, round(height)))
 
 def mainLoop():
     num_notes = len(dsp.notes_name)
@@ -191,7 +216,6 @@ def mainLoop():
                 lbl_note_right.configure(text="--")
 
             # print(dsp.notes_name[target_note_index-1],dsp.notes_name[target_note_index],dsp.notes_name[target_note_index+1])
-            lbl_note.configure(text=dsp.notes_name[target_note_index])
 
             # lbl_note_left.pack(side="left", padx=120, pady=0)
             # lbl_note.pack(side="left", padx=50, pady=0)
